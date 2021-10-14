@@ -103,6 +103,7 @@ celerybeat.pid
 
 # Environments
 .env
+venv_InCal_notebooks/
 .venv
 env/
 venv/
