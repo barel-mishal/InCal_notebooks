@@ -96,7 +96,7 @@ def incal_create_group_column_from_ids(ids_column, dict_groups):
 
 
 if __name__ == '__main__':
-    experiment_name = "_shani"
+    experiment_name = "shani"
     dataframes = [
         pd.read_csv(
             "../../csvs/all_weeks\hebrew_2021-07-28_16_33_hebrew16_shani_w2_acdoors_pt1_m_calr.csv",
