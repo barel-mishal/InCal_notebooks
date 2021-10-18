@@ -108,24 +108,27 @@ def start_incal_formatter(path, datetime_name, cumulative_parm,
 
 
 if __name__ == '__main__':
-
-    experiment_name = "shani"
+    experiment_name = "maital"
     # 1. specific the location .csv file or fils in the list
+    # dataframes = [
+    #     "../../csvs/all_weeks\hebrew_2021-07-28_16_33_hebrew16_shani_w2_acdoors_pt1_m_calr.csv",
+    #     "../../csvs/all_weeks\hebrew_2021-08-01_13_49_hebrew16_shani_w1_pt2b_m_calr.csv",
+    #     "../../csvs/all_weeks/hebrew_2021-08-04_11_45_hebrew16_shani_acdoors_w2p1_m_calr.csv",
+    #     "../../csvs/all_weeks/hebrew_2021-08-10_16_15_hebrew16_shani_w2p2.1_m_calr.csv",
+    #     "../../csvs/all_weeks/hebrew_2021-08-11_16_24_hebrew16_shani_acdoors_w3_m_calr.csv",
+    #     "../../csvs/all_weeks/hebrew_2021-08-19_16_17_hebrew16_shani_acdoors_w4_m_calr.csv",
+    #     "../../csvs/all_weeks/hebrew_2021-08-15_16_24_hebrew16_sahni_acdoors_w3p2_m_calr.csv",
+    #     "../../csvs/all_weeks/hebrew_2021-08-26_16_12_hebrew16_shani_acdoors_w5_m_calr.csv",
+    #     "../../csvs/all_weeks/hebrew_2021-08-29_08_41_hebrew16_shani_acdoors_w5_dd_m_calr.csv",
+    #     "../../csvs/all_weeks/hebrew_2021-09-02_07_54_hebrew16_dark dark week2_m_calr.csv",
+    # ]
     dataframes = [
-        "../../csvs/all_weeks\hebrew_2021-07-28_16_33_hebrew16_shani_w2_acdoors_pt1_m_calr.csv",
-        "../../csvs/all_weeks\hebrew_2021-08-01_13_49_hebrew16_shani_w1_pt2b_m_calr.csv",
-        "../../csvs/all_weeks/hebrew_2021-08-04_11_45_hebrew16_shani_acdoors_w2p1_m_calr.csv",
-        "../../csvs/all_weeks/hebrew_2021-08-10_16_15_hebrew16_shani_w2p2.1_m_calr.csv",
-        "../../csvs/all_weeks/hebrew_2021-08-11_16_24_hebrew16_shani_acdoors_w3_m_calr.csv",
-        "../../csvs/all_weeks/hebrew_2021-08-19_16_17_hebrew16_shani_acdoors_w4_m_calr.csv",
-        "../../csvs/all_weeks/hebrew_2021-08-15_16_24_hebrew16_sahni_acdoors_w3p2_m_calr.csv",
-        "../../csvs/all_weeks/hebrew_2021-08-26_16_12_hebrew16_shani_acdoors_w5_m_calr.csv",
-        "../../csvs/all_weeks/hebrew_2021-08-29_08_41_hebrew16_shani_acdoors_w5_dd_m_calr.csv",
-        "../../csvs/all_weeks/hebrew_2021-09-02_07_54_hebrew16_dark dark week2_m_calr.csv",
+        "csvs/hebrew_2021-10-10_07_36_ido_accessdoors_1021_script1_w1_m_calr.csv",
     ]
     # 2. Specific the pattern of cumuletive column names
     cumulative_parm = "|".join(
         ['food', 'water', 'allmeters', 'wheelmeters', 'pedmeters'])
+    date_time_column_name = 'Date_Time_1'
     # 3. Specific the prefix for the new actuals columns
     pattern_addition_to_parms = 'actual_'
     # 4. Specific the design experiment groups and subjects
@@ -136,11 +139,12 @@ if __name__ == '__main__':
     # --------
     # Creating the format
     df_groups = pd.DataFrame(dict_groups.values(), index=dict_groups.keys())
+
     dfs = [
-        start_incal_formatter(df, cumulative_parm, pattern_addition_to_parms)
-        for df in dataframes
+        start_incal_formatter(df, date_time_column_name, cumulative_parm,
+                              pattern_addition_to_parms) for df in dataframes
     ]
-    dfs_concated = pd.concat(dfs).set_index('Date_Time_1')
+    dfs_concated = pd.concat(dfs).set_index(date_time_column_name)
     df = incal_wide_to_long_df(dfs_concated)
     index_datetime_subjects, df = df.index.to_frame().reset_index(
         drop=True), df.reset_index(drop=True)
