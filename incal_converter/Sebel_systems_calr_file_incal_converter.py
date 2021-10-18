@@ -31,9 +31,14 @@ def _get_actuals_values(df):
     return df_actuals_features_calculeted.fillna(first_row_df_cumuletive)
 
 
+def pandas_dataframe_from_path(path, datetime_column_name):
+    return pd.read_csv(path, date_parser=datetime_column_name)
+
+
 def incal_get_actuals_from_cumuletive(df, columns_pattern,
                                       pattern_addition_to_parms):
     # get just the cumuletive columns from the original df
+
     df_cumuletive_culumns = select_columns_by_metebolic_parm(
         df, columns_pattern)
     # get the columns names of the cumuletive columns
@@ -95,54 +100,45 @@ def incal_create_group_column_from_ids(ids_column, dict_groups):
                                    subjects_within_groups)
 
 
+def start_incal_formatter(path, datetime_name, cumulative_parm,
+                          pattern_addition_to_parms):
+    df = pandas_dataframe_from_path(path, datetime_name)
+    return incal_get_actuals_from_cumuletive(df, cumulative_parm,
+                                             pattern_addition_to_parms)
+
+
 if __name__ == '__main__':
+
     experiment_name = "shani"
+    # 1. specific the location .csv file or fils in the list
     dataframes = [
-        pd.read_csv(
-            "../../csvs/all_weeks\hebrew_2021-07-28_16_33_hebrew16_shani_w2_acdoors_pt1_m_calr.csv",
-            parse_dates=['Date_Time_1']),
-        pd.read_csv(
-            "../../csvs/all_weeks\hebrew_2021-08-01_13_49_hebrew16_shani_w1_pt2b_m_calr.csv",
-            parse_dates=['Date_Time_1']),
-        pd.read_csv(
-            "../../csvs/all_weeks/hebrew_2021-08-04_11_45_hebrew16_shani_acdoors_w2p1_m_calr.csv",
-            parse_dates=['Date_Time_1']),
-        pd.read_csv(
-            "../../csvs/all_weeks/hebrew_2021-08-10_16_15_hebrew16_shani_w2p2.1_m_calr.csv",
-            parse_dates=['Date_Time_1']),
-        pd.read_csv(
-            "../../csvs/all_weeks/hebrew_2021-08-11_16_24_hebrew16_shani_acdoors_w3_m_calr.csv",
-            parse_dates=['Date_Time_1']),
-        pd.read_csv(
-            "../../csvs/all_weeks/hebrew_2021-08-19_16_17_hebrew16_shani_acdoors_w4_m_calr.csv",
-            parse_dates=['Date_Time_1']),
-        pd.read_csv(
-            "../../csvs/all_weeks/hebrew_2021-08-15_16_24_hebrew16_sahni_acdoors_w3p2_m_calr.csv",
-            parse_dates=['Date_Time_1']),
-        pd.read_csv(
-            "../../csvs/all_weeks/hebrew_2021-08-26_16_12_hebrew16_shani_acdoors_w5_m_calr.csv",
-            parse_dates=['Date_Time_1']),
-        pd.read_csv(
-            "../../csvs/all_weeks/hebrew_2021-08-29_08_41_hebrew16_shani_acdoors_w5_dd_m_calr.csv",
-            parse_dates=['Date_Time_1']),
-        pd.read_csv(
-            "../../csvs/all_weeks/hebrew_2021-09-02_07_54_hebrew16_dark dark week2_m_calr.csv",
-            parse_dates=['Date_Time_1'])
+        "../../csvs/all_weeks\hebrew_2021-07-28_16_33_hebrew16_shani_w2_acdoors_pt1_m_calr.csv",
+        "../../csvs/all_weeks\hebrew_2021-08-01_13_49_hebrew16_shani_w1_pt2b_m_calr.csv",
+        "../../csvs/all_weeks/hebrew_2021-08-04_11_45_hebrew16_shani_acdoors_w2p1_m_calr.csv",
+        "../../csvs/all_weeks/hebrew_2021-08-10_16_15_hebrew16_shani_w2p2.1_m_calr.csv",
+        "../../csvs/all_weeks/hebrew_2021-08-11_16_24_hebrew16_shani_acdoors_w3_m_calr.csv",
+        "../../csvs/all_weeks/hebrew_2021-08-19_16_17_hebrew16_shani_acdoors_w4_m_calr.csv",
+        "../../csvs/all_weeks/hebrew_2021-08-15_16_24_hebrew16_sahni_acdoors_w3p2_m_calr.csv",
+        "../../csvs/all_weeks/hebrew_2021-08-26_16_12_hebrew16_shani_acdoors_w5_m_calr.csv",
+        "../../csvs/all_weeks/hebrew_2021-08-29_08_41_hebrew16_shani_acdoors_w5_dd_m_calr.csv",
+        "../../csvs/all_weeks/hebrew_2021-09-02_07_54_hebrew16_dark dark week2_m_calr.csv",
     ]
+    # 2. Specific the pattern of cumuletive column names
+    cumulative_parm = "|".join(
+        ['food', 'water', 'allmeters', 'wheelmeters', 'pedmeters'])
+    # 3. Specific the prefix for the new actuals columns
+    pattern_addition_to_parms = 'actual_'
+    # 4. Specific the design experiment groups and subjects
     dict_groups = OrderedDict(Control=[1, 4, 7, 10, 13],
                               Group_2=[3, 5, 9, 12, 16],
                               Group_3=[2, 6, 8, 11, 14, 15])
-
-    is_one_file = len(dataframes) == 1
-    cumulative_parm = "|".join(
-        ['food', 'water', 'allmeters', 'wheelmeters', 'pedmeters'])
-    pattern_addition_to_parms = 'actual_'
-
-    df_or_dfs_in_list = dataframes
+    # 5. run the script
+    # --------
+    # Creating the format
+    df_groups = pd.DataFrame(dict_groups.values(), index=dict_groups.keys())
     dfs = [
-        incal_get_actuals_from_cumuletive(df, cumulative_parm,
-                                          pattern_addition_to_parms)
-        for df in df_or_dfs_in_list
+        start_incal_formatter(df, cumulative_parm, pattern_addition_to_parms)
+        for df in dataframes
     ]
     dfs_concated = pd.concat(dfs).set_index('Date_Time_1')
     df = incal_wide_to_long_df(dfs_concated)
@@ -157,8 +153,9 @@ if __name__ == '__main__':
     df = pd.concat([multi_index_df, df], axis=1)
 
     print()
-    print(
-        f'Check for file name (InCal_format_{experiment_name}.csv) at the root of your local env'
-    )
+    print(f'''At the root of your local enviroment check for files names:
+    1. InCal_format_{experiment_name}.csv
+    2. InCal_format_your_Design.csv''')
     print()
-    df.to_csv(f'InCal_format_{experiment_name}.csv', index=False)
+    df.to_csv(f'InCal_format_{experiment_name}.csv', index=False),
+    df_groups.to_csv('InCal_format_your_Design.csv')
