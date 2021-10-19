@@ -1,5 +1,6 @@
 _calr_Energy_Balance_check/
 upload_and_marge_files.ipynb
+privte_notebooks/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
