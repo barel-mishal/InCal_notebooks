@@ -90,7 +90,7 @@ def replace_ids_to_group_id(ndarray_ids, groups_names, subjects_within_group):
 
 
 def incal_create_group_column_from_ids(ids_column, dict_groups):
-    n_ids_multiple_name = lambda name, n: [name] * len(n)
+    def n_ids_multiple_name(name, n): return [name] * len(n)
     subjects_vlaues = ids_column.values
     items = dict_groups.items()
     groups_names = flat_list(
@@ -108,23 +108,27 @@ def start_incal_formatter(path, datetime_name, cumulative_parm,
 
 
 if __name__ == '__main__':
-    experiment_name = "maital"
+    experiment_name = "SHANI_EXP_MODI_RESTRIC_PLUS_DD"
     # 1. specific the location .csv file or fils in the list
-    # dataframes = [
-    #     "../../csvs/all_weeks\hebrew_2021-07-28_16_33_hebrew16_shani_w2_acdoors_pt1_m_calr.csv",
-    #     "../../csvs/all_weeks\hebrew_2021-08-01_13_49_hebrew16_shani_w1_pt2b_m_calr.csv",
-    #     "../../csvs/all_weeks/hebrew_2021-08-04_11_45_hebrew16_shani_acdoors_w2p1_m_calr.csv",
-    #     "../../csvs/all_weeks/hebrew_2021-08-10_16_15_hebrew16_shani_w2p2.1_m_calr.csv",
-    #     "../../csvs/all_weeks/hebrew_2021-08-11_16_24_hebrew16_shani_acdoors_w3_m_calr.csv",
-    #     "../../csvs/all_weeks/hebrew_2021-08-19_16_17_hebrew16_shani_acdoors_w4_m_calr.csv",
-    #     "../../csvs/all_weeks/hebrew_2021-08-15_16_24_hebrew16_sahni_acdoors_w3p2_m_calr.csv",
-    #     "../../csvs/all_weeks/hebrew_2021-08-26_16_12_hebrew16_shani_acdoors_w5_m_calr.csv",
-    #     "../../csvs/all_weeks/hebrew_2021-08-29_08_41_hebrew16_shani_acdoors_w5_dd_m_calr.csv",
-    #     "../../csvs/all_weeks/hebrew_2021-09-02_07_54_hebrew16_dark dark week2_m_calr.csv",
-    # ]
     dataframes = [
-        "_calr_Energy_Balance_check\small_calr.csv",
+        'csvs\shani\\allweeks\hebrew_2021-08-04_11_45_hebrew16_shani_acdoors_w2p1_m_calr.csv',
+        'csvs\shani\\allweeks\hebrew_2021-08-10_16_15_hebrew16_shani_w2p2.1_m_calr.csv',
+        'csvs\shani\\allweeks\hebrew_2021-08-11_16_24_hebrew16_shani_acdoors_w3_m_calr.csv',
+        'csvs\shani\\allweeks\hebrew_2021-08-15_16_24_hebrew16_sahni_acdoors_w3p2_m_calr.csv',
+        'csvs\shani\\allweeks\hebrew_2021-08-19_16_17_hebrew16_shani_acdoors_w4_m_calr.csv',
+        'csvs\shani\\allweeks\hebrew_2021-08-26_16_12_hebrew16_shani_acdoors_w5_m_calr.csv',
+        'csvs\shani\\allweeks\hebrew_2021-08-29_08_41_hebrew16_shani_acdoors_w5_dd_recovered_m_calr.csv',
+        'csvs\shani\\allweeks\hebrew_2021-09-02_07_54_hebrew16_dark dark week2_m_calr.csv',
     ]
+    # dataframes = [
+    #     "csvs\meital\hebrew_2021-10-10_07_36_ido_accessdoors_1021_script1_w1_m_calr.csv",
+    #     "csvs\meital\hebrew_2021-10-17_10_05_ido_accessdoors_1021_script2_w2_m_calr.csv",
+    #     "csvs\meital\hebrew_2021-10-25_16_03_ido_accessdoors_1021_script2_w3_m_calr.csv",
+    #     "csvs\meital\hebrew_2021-10-31_09_58_ido_accessdoors_1021_script2_w4_m_calr.csv",
+    #     "csvs\meital\hebrew_2021-11-07_10_52_ido_accessdoors_1021_script1_w5_m_calr.csv",
+    #     "csvs\meital\hebrew_2021-11-11_09_31_hebrew16_ido_w5_no_restrictions_m_calr.csv"
+    # ]
+
     # 2. Specific the pattern of cumuletive column names
     cumulative_parm = "|".join(
         ['food', 'water', 'allmeters', 'wheelmeters', 'pedmeters'])
@@ -132,21 +136,23 @@ if __name__ == '__main__':
     # 3. Specific the prefix for the new actuals columns
     pattern_addition_to_parms = 'actual_'
     # 4. Specific the design experiment groups and subjects
-    dict_groups = OrderedDict(Control=[1, 2, 3],
-                              Group_2=[6, 7, 8],
-                              Group_3=[4, 5, 10, 9])
-    # dict_groups = OrderedDict(Control=[1, 4, 7, 10, 13],
-    #                         Group_2=[3, 5, 9, 12, 16],
-    #                         Group_3=[2, 6, 8, 11, 14, 15])
+    # dict_groups = OrderedDict(Group=[i for i in range(1, 17)])
+    dict_groups = OrderedDict(Control=[1, 4, 7, 10, 13],
+                              Group_2=[3, 5, 9, 12, 16],
+                              Group_3=[2, 6, 8, 11, 14, 15])
     # 5. run the script
     # --------
     # Creating the format
     df_groups = pd.DataFrame(dict_groups.values(), index=dict_groups.keys())
-
+    print(dataframes[-2:])
     dfs = [
-        start_incal_formatter(df, date_time_column_name, cumulative_parm,
-                              pattern_addition_to_parms) for df in dataframes
+        start_incal_formatter(
+            df,
+            date_time_column_name,
+            cumulative_parm,
+            pattern_addition_to_parms) for df in dataframes
     ]
+
     dfs_concated = pd.concat(dfs).set_index(date_time_column_name)
     df = incal_wide_to_long_df(dfs_concated)
     index_datetime_subjects, df = df.index.to_frame().reset_index(
@@ -159,10 +165,16 @@ if __name__ == '__main__':
          pd.Series(groupid, name='Group')], axis=1)
     df = pd.concat([multi_index_df, df], axis=1)
 
+    location = 'csvs\shani\modi'
     print()
-    print(f'''At the root of your local enviroment check for files names:
+    print(f'''At the {location} of your local enviroment check for files names:
     1. InCal_format_{experiment_name}.csv
-    2. InCal_format_your_Design.csv''')
+    2. InCal_format_your_Design.csv
+    ''')
     print()
-    df.to_csv(f'InCal_format_{experiment_name}.csv', index=False),
-    df_groups.to_csv('InCal_format_your_Design.csv')
+    df.to_csv(
+        f'{location}InCal_format_{experiment_name}.csv', index=False),
+    df_groups.to_csv(
+        f'{location}InCal_format_your_Design_{experiment_name}.csv')
+    
+# glob.glob(pathname)
